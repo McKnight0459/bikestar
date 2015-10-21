@@ -26,9 +26,15 @@ Open up the serial console on the Arduino at 115200 baud to interact with FONA
 This code will receive an SMS, identify the sender's phone number, and automatically send a response
 
 */
+#define LED_R 5
+#define LED_G 6
+#define LED_B 7
+
 #define TX_PIN 9
 #define BIT_PERIOD 700
 #define TIMES 22
+ 
+int PWMValue = 0;
 
 float times[TIMES] = {
   0, .0015, .003, .0045, .0092, .0122, .0161, .0214, .0268, .0298, .0352, .0413, .0436, .0505, .0535, .0574, .062, .0673, .0719, .0757, .0803 };
@@ -58,10 +64,10 @@ Adafruit_FONA fona = Adafruit_FONA(FONA_RST);
 uint8_t readline(char *buff, uint8_t maxbuff, uint16_t timeout = 0);
 
 void setup() {
-  pinMode(TX_PIN, OUTPUT);
-    
+ // pinMode(TX_PIN, OUTPUT);
+  void RGB_init(); 
+  
   while (!Serial);
-
   Serial.begin(115200);
   Serial.println(F("FONA SMS caller ID test"));
   Serial.println(F("Initializing....(May take 3 seconds)"));
@@ -134,7 +140,7 @@ void loop() {
             // now, should this SMS ring the doorbell??
       // we use the C function `strstr` because we're dealing with a character array,
       // not the typical arduino "string" object
-      if (strstr(replybuffer, "doorbell\0") != NULL)
+      if (strstr(replybuffer, "Quiet\0") != NULL)
       {
         ring_bell();
       }
@@ -155,37 +161,75 @@ void loop() {
 
 void ring_bell()
 {
-  Serial.println("Ringing!\n");
-/*
-  // the actual doorbell sends our signal 12 times, so we'll emulate it
-  for (int j = 0; j < 12; j++)
-  {
-		single_ring();
-  }*/
-  digitalWrite(TX_PIN, HIGH);
-//  delayMicroseconds(BIT_PERIOD);
- // digitalWrite(TX_PIN, LOW);
+  Serial.println("Flashing!\n");
+  RGB_run();
 }
 
-void single_ring()
+void RGB_init()
+{   
+
+  pinMode(LED_R, OUTPUT);
+  pinMode(LED_G, OUTPUT);
+  pinMode(LED_B, OUTPUT);
+  analogWrite(LED_R,255);      //高电平255 = 占空比是100%，IO相当于输出高电平，红色LED熄灭
+  analogWrite(LED_G,255);     //高电平255 = 占空比是100%，IO相当于输出高电平，绿色LED熄灭
+  analogWrite(LED_B,255);     //高电平255 = 占空比是100%，IO相当于输出高电平，蓝色LED熄灭
+}
+
+void RGB_run()
 {
-	int last = 0;
-
-	// go through each "1" bit
-	for (int i = 0; i < TIMES-1; i++)
-	{
-		// calculate microseconds (us)
-		int us = times[i] * 1000000;
-		if (i != 0)
-			delayMicroseconds(us - last - BIT_PERIOD);
-
-		// send a "1" for our BIT_PERIOD which is around 700-800us 
-		digitalWrite(TX_PIN, HIGH);
-		delayMicroseconds(BIT_PERIOD);
-		digitalWrite(TX_PIN, LOW);
-
-		last = us;
-	}
-	delay(20);
+  int i = 0;
+  PWMValue = 255;
+  for(i = 0 ; i < 255 ; i++)    //红色逐渐变亮
+  {
+    analogWrite(LED_R,PWMValue--);
+    analogWrite(LED_G,255);
+    analogWrite(LED_B,255);
+    delay(10);                  
+  }
+  PWMValue = 0;
+  for(i = 0 ; i < 255 ; i++)    //逐渐变暗
+  {
+    analogWrite(LED_R,PWMValue++);
+    analogWrite(LED_G,255);
+    analogWrite(LED_B,255);
+    delay(10);
+  }
+  
+   PWMValue = 255;
+  for(i = 0 ; i < 255 ; i++)    //绿色逐渐变亮
+  {
+    analogWrite(LED_R,255);
+    analogWrite(LED_G,PWMValue--);
+    analogWrite(LED_B,255);
+    delay(10);
+  }
+  PWMValue = 0;
+  for(i = 0 ; i < 255 ; i++)    //逐渐变暗
+  {
+    analogWrite(LED_R,255);
+    analogWrite(LED_G,PWMValue++);
+    analogWrite(LED_B,255);
+    delay(10);
+  }
+  
+  PWMValue = 255;
+  for(i = 0 ; i < 255 ; i++)    //蓝色逐渐变亮
+  {
+    analogWrite(LED_R,255);
+    analogWrite(LED_G,255);
+    analogWrite(LED_B,PWMValue--);
+    delay(10);
+  }
+  PWMValue = 0;
+  for(i = 0 ; i < 255 ; i++)    //逐渐变暗
+  {
+    analogWrite(LED_R,255);
+    analogWrite(LED_G,255);
+    analogWrite(LED_B,PWMValue++);
+    delay(10);
+  }
+  
 }
+
 
