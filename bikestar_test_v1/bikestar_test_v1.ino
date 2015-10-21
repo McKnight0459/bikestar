@@ -137,7 +137,7 @@ void loop() {
       Serial.println(replybuffer);
       Serial.println(F("*****"));
   
-            // now, should this SMS ring the doorbell??
+       // now, should this SMS ring the doorbell??
       // we use the C function `strstr` because we're dealing with a character array,
       // not the typical arduino "string" object
       if (strstr(replybuffer, "Quiet\0") != NULL)
@@ -163,8 +163,15 @@ void ring_bell()
 {
   Serial.println("Flashing!\n");
   RGB_run();
+  delay(5000);
+  RGB_off();
 }
-
+void  RGB_off()
+{
+  analogWrite(LED_R,0);      //高电平255 = 占空比是100%，IO相当于输出高电平，红色LED熄灭
+  analogWrite(LED_G,0);     //高电平255 = 占空比是100%，IO相当于输出高电平，绿色LED熄灭
+  analogWrite(LED_B,0);     //高电平255 = 占空比是100%，IO相当于输出高电平，蓝色LED熄灭
+}
 void RGB_init()
 {   
 
