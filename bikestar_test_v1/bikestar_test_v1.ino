@@ -26,18 +26,12 @@ Open up the serial console on the Arduino at 115200 baud to interact with FONA
 This code will receive an SMS, identify the sender's phone number, and automatically send a response
 
 */
-#define LED_R 5
-#define LED_G 6
-#define LED_B 7
-
-#define TX_PIN 9
-#define BIT_PERIOD 700
-#define TIMES 22
- 
-int PWMValue = 0;
-
-float times[TIMES] = {
-  0, .0015, .003, .0045, .0092, .0122, .0161, .0214, .0268, .0298, .0352, .0413, .0436, .0505, .0535, .0574, .062, .0673, .0719, .0757, .0803 };
+#define LED_1 5
+#define LED_2 6
+#define LED_3 7
+#define LED_4 8
+#define LED_5 9
+#define BUZZER 10
 
 
 #include "Adafruit_FONA.h"
@@ -64,9 +58,23 @@ Adafruit_FONA fona = Adafruit_FONA(FONA_RST);
 uint8_t readline(char *buff, uint8_t maxbuff, uint16_t timeout = 0);
 
 void setup() {
- // pinMode(TX_PIN, OUTPUT);
-  void RGB_init(); 
-  
+ /*****************************************************************/
+ //Pin Init
+  pinMode(BUZZER, OUTPUT);
+    pinMode(LED_1, OUTPUT);
+      pinMode(LED_2, OUTPUT);
+        pinMode(LED_3, OUTPUT);
+          pinMode(LED_4, OUTPUT);
+            pinMode(LED_5, OUTPUT);
+  digitalWrite(BUZZER,LOW);     //Buzzer不响
+   digitalWrite(LED_1,LOW);      //1号LED熄灭
+    digitalWrite(LED_2,LOW);      //2号LED熄灭
+      digitalWrite(LED_3,LOW);      //3号LED熄灭
+        digitalWrite(LED_4,LOW);      //4号LED熄灭
+          digitalWrite(LED_5,LOW);      //5号LED熄灭
+ /*****************************************************************/
+//Fona Init
+ 
   while (!Serial);
   Serial.begin(115200);
   Serial.println(F("FONA SMS caller ID test"));
@@ -142,7 +150,10 @@ void loop() {
       // not the typical arduino "string" object
       if (strstr(replybuffer, "Quiet\0") != NULL)
       {
-        ring_bell();
+        QuietMode();
+      }else if (strstr(replybuffer, "Loud\0") != NULL)
+      {
+        LoudMode();
       }
       
       // delete an SMS
@@ -159,84 +170,51 @@ void loop() {
   }
 }
 
-void ring_bell()
+void QuietMode()
 {
-  Serial.println("Flashing!\n");
-  RGB_run();
+      Serial.println("QuietMode!\n");
+  LED_on();
   delay(5000);
-  RGB_off();
+  LED_off();
 }
-void  RGB_off()
+
+void LoudMode()
 {
-  analogWrite(LED_R,0);      //高电平255 = 占空比是100%，IO相当于输出高电平，红色LED熄灭
-  analogWrite(LED_G,0);     //高电平255 = 占空比是100%，IO相当于输出高电平，绿色LED熄灭
-  analogWrite(LED_B,0);     //高电平255 = 占空比是100%，IO相当于输出高电平，蓝色LED熄灭
+    Serial.println("LoudMode!\n");
+  LED_on();
+  Buzzer_on();
+  delay(5000);
+  LED_off();
+  Buzzer_off();
 }
-void RGB_init()
-{   
-
-  pinMode(LED_R, OUTPUT);
-  pinMode(LED_G, OUTPUT);
-  pinMode(LED_B, OUTPUT);
-  analogWrite(LED_R,255);      //高电平255 = 占空比是100%，IO相当于输出高电平，红色LED熄灭
-  analogWrite(LED_G,255);     //高电平255 = 占空比是100%，IO相当于输出高电平，绿色LED熄灭
-  analogWrite(LED_B,255);     //高电平255 = 占空比是100%，IO相当于输出高电平，蓝色LED熄灭
-}
-
-void RGB_run()
+void LED_on()
 {
-  int i = 0;
-  PWMValue = 255;
-  for(i = 0 ; i < 255 ; i++)    //红色逐渐变亮
-  {
-    analogWrite(LED_R,PWMValue--);
-    analogWrite(LED_G,255);
-    analogWrite(LED_B,255);
-    delay(10);                  
-  }
-  PWMValue = 0;
-  for(i = 0 ; i < 255 ; i++)    //逐渐变暗
-  {
-    analogWrite(LED_R,PWMValue++);
-    analogWrite(LED_G,255);
-    analogWrite(LED_B,255);
-    delay(10);
-  }
-  
-   PWMValue = 255;
-  for(i = 0 ; i < 255 ; i++)    //绿色逐渐变亮
-  {
-    analogWrite(LED_R,255);
-    analogWrite(LED_G,PWMValue--);
-    analogWrite(LED_B,255);
-    delay(10);
-  }
-  PWMValue = 0;
-  for(i = 0 ; i < 255 ; i++)    //逐渐变暗
-  {
-    analogWrite(LED_R,255);
-    analogWrite(LED_G,PWMValue++);
-    analogWrite(LED_B,255);
-    delay(10);
-  }
-  
-  PWMValue = 255;
-  for(i = 0 ; i < 255 ; i++)    //蓝色逐渐变亮
-  {
-    analogWrite(LED_R,255);
-    analogWrite(LED_G,255);
-    analogWrite(LED_B,PWMValue--);
-    delay(10);
-  }
-  PWMValue = 0;
-  for(i = 0 ; i < 255 ; i++)    //逐渐变暗
-  {
-    analogWrite(LED_R,255);
-    analogWrite(LED_G,255);
-    analogWrite(LED_B,PWMValue++);
-    delay(10);
-  }
-  
+  Serial.println("LED On!\n");
+   digitalWrite(LED_1,HIGH);      //1号LED熄灭
+    digitalWrite(LED_2,HIGH);      //2号LED熄灭
+      digitalWrite(LED_3,HIGH);      //3号LED熄灭
+        digitalWrite(LED_4,HIGH);      //4号LED熄灭
+          digitalWrite(LED_5,HIGH);      //5号LED熄灭
 }
+void  LED_off()
+{
+    Serial.println("LED OFF!\n");
+  digitalWrite(LED_1,LOW);      //1号LED熄灭
+    digitalWrite(LED_2,LOW);      //2号LED熄灭
+      digitalWrite(LED_3,LOW);      //3号LED熄灭
+        digitalWrite(LED_4,LOW);      //4号LED熄灭
+          digitalWrite(LED_5,LOW);      //5号LED熄灭
 
+}
+void Buzzer_on()
+{
+  Serial.println("Buzzer On!\n");
+  digitalWrite(BUZZER,HIGH);      //BUZZER ON..
+}
+void  Buzzer_off()
+{
+    Serial.println("Buzzer OFF!\n");
+  digitalWrite(BUZZER,LOW);      //BUZZER OFF.
+
+}
 
